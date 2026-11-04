@@ -18,13 +18,13 @@ async function bootstrap(): Promise<void> {
   }));
   app.enableShutdownHooks();
 
-  const swaggerConfig = new DocumentBuilder()
+  const openApiConfig = new DocumentBuilder()
     .setTitle('Mero Event API')
     .setDescription('Vendor Bidding and Booking System API')
     .setVersion('1.0.0')
     .build();
-  SwaggerModule.setup('api/docs', app, () => SwaggerModule.createDocument(app, swaggerConfig));
-  app.use('/api/reference', apiReference({ url: '/api/docs-json' }));
+  const openApiDocument = SwaggerModule.createDocument(app, openApiConfig);
+  app.use('/api/reference', apiReference({ content: openApiDocument }));
 
   await app.listen(config.getOrThrow<number>('PORT'), '0.0.0.0');
 }

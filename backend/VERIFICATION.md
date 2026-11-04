@@ -19,8 +19,7 @@ Executed on Node.js 24.18.0 with npm 11.16.0 and Colima Docker.
 | GET /api/health | HTTP 200, {"status":"ok","database":"connected"} |
 | Database outage | Stopped project container; HTTP 503, {"status":"error","database":"disconnected"} |
 | Recovery | Restored container; same API process returned HTTP 200 |
-| Swagger | Browser rendered title, version, description and health operation |
-| OpenAPI JSON | Only /api/health; expected metadata and 200/503 responses |
+| Scalar | Browser rendered title, version, description and health operation |
 | CORS | Configured localhost:3000 origin returned |
 | Default example route | GET / returned HTTP 404 |
 | Environment validation | Invalid database URL and port rejected; defaults verified |
@@ -36,4 +35,4 @@ No migration was created or applied because this phase intentionally has no busi
 
 ## Scalar integration
 
-Installed the official `@scalar/nestjs-api-reference` middleware at `/api/reference`, reading the shared `/api/docs-json` specification. Lint and build passed. Scalar, Swagger, OpenAPI JSON, and health each returned HTTP 200. Browser verification confirmed the API title, health operation, 200/503 response documentation, response examples, and client code samples rendered in Scalar.
+Installed the official `@scalar/nestjs-api-reference` middleware at `/api/reference`, using the generated OpenAPI document directly. The Swagger UI and public OpenAPI JSON endpoints were removed. Lint and build passed. Browser verification confirmed the API title, health operation, 200/503 response documentation, response examples, and client code samples rendered in Scalar.
