@@ -25,6 +25,25 @@ enum InvitationStatus {
   RESPONDED
 }
 
+enum BidStatus {
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  ESEWA
+  KHALTI
+  OTHER
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
@@ -66,6 +85,7 @@ model WorkRequest {
   items         RequestItem[]
   photos        RequestPhoto[]
   invitations   Invitation[]
+  booking       Booking?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
@@ -105,7 +125,50 @@ model Invitation {
   vendor        Vendor           @relation(fields: [vendorId], references: [id])
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  bid           Bid?
 
   @@unique([workRequestId, vendorId])
   @@index([vendorId])
+}
+
+model Bid {
+  id           String     @id @default(uuid()) @db.Uuid
+  invitationId String     @unique @db.Uuid
+  invitation   Invitation @relation(fields: [invitationId], references: [id])
+  amount       Decimal    @db.Decimal(12, 2)
+  notes        String?
+  status       BidStatus  @default(SUBMITTED)
+  submittedAt  DateTime   @default(now())
+  booking      Booking?
+
+  @@index([status])
+}
+
+model Booking {
+  id            String        @id @default(uuid()) @db.Uuid
+  workRequestId String        @unique @db.Uuid
+  bidId         String        @unique @db.Uuid
+  workRequest   WorkRequest   @relation(fields: [workRequestId], references: [id])
+  bid           Bid           @relation(fields: [bidId], references: [id])
+  amount        Decimal       @db.Decimal(12, 2)
+  status        BookingStatus @default(CONFIRMED)
+  payments      Payment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Payment {
+  id        String        @id @default(uuid()) @db.Uuid
+  bookingId String        @db.Uuid
+  booking   Booking       @relation(fields: [bookingId], references: [id])
+  amount    Decimal       @db.Decimal(12, 2)
+  method    PaymentMethod
+  reference String?
+  notes     String?
+  paidAt    DateTime      @default(now())
+  createdAt DateTime      @default(now())
+
+  @@index([bookingId])
 }

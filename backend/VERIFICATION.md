@@ -75,3 +75,18 @@ Installed the official `@scalar/nestjs-api-reference` middleware at `/api/refere
 - `npm run lint`, `npm run build`, Prisma validation/generation, migration deployment, PostgreSQL health, and Scalar route discovery passed.
 - Multer was updated to 2.5.0 after the production audit identified high-severity advisories in 2.0.2. `npm audit --omit=dev` subsequently reported zero production vulnerabilities.
 - All disposable users, vendors, requests, invitations, items, photos, and uploaded smoke-test files were removed.
+
+## Bidding, booking, and payment verification
+
+- Added BidStatus, BookingStatus, PaymentMethod, Bid, Booking, and Payment without duplicating vendor or work-request ownership fields.
+- Created and applied migration `20261104092300_add_bidding_bookings_payments`; PostgreSQL uses `DECIMAL(12,2)` for all money and unique constraints enforce one bid per invitation, one booking per request, and one booking per winning bid.
+- Implemented vendor bid submission/listing, ADMIN bid comparison/acceptance, ADMIN booking list/details, vendor booking listing, and manual payment recording.
+- Bid creation atomically marks the invitation RESPONDED. Acceptance atomically accepts the selected bid, rejects competitors, books the request, and creates one confirmed Booking using the bid amount.
+- Payment totals, remaining balance, and UNPAID/PARTIALLY_PAID/PAID status use Prisma Decimal only; no floating-point money arithmetic or stored pending/status column was introduced.
+- Serializable transactions and database uniqueness protect duplicate bid submission, simultaneous bid acceptance, duplicate bookings, and concurrent overpayment.
+- Real HTTP verification submitted two bids, confirmed amount ordering and lowest-bid comparison, deliberately selected the higher bid, rejected the cheaper competitor, and returned HTTP 409 for another acceptance.
+- Real payment verification recorded `20000.10` and `9999.90` as exactly `30000.00`, rejected a `50000.01` overpayment, then recorded `50000.00` for a fully paid `80000.00` booking.
+- Vendor isolation passed: an uninvited vendor received 404 when bidding, each vendor saw only its bid, only the winning vendor saw the booking, and no response exposed credentials.
+- Scalar contained all new bidding, booking, vendor booking, and payment paths. Authentication and role failures returned 401 and 403 as expected.
+- `npm test`: 41 tests passed. Prisma validation/generation, migration application, lint, build, health, and the complete HTTP/PostgreSQL workflow passed.
+- All disposable users, vendors, work requests, invitations, bids, bookings, and payments were removed after verification.

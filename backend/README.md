@@ -1,6 +1,6 @@
 # Mero Event backend
 
-NestJS backend for the Mero Event Vendor Bidding and Booking System assessment. It includes admin and vendor users, ADMIN-only vendor management, cookie-based JWT authentication, role authorization, PostgreSQL connectivity through Prisma, Scalar API documentation, and a database-backed health endpoint. Bidding, booking, payment, and other business APIs are intentionally deferred.
+NestJS backend for the Mero Event Vendor Bidding and Booking System assessment. It includes admin and vendor users, vendor management, work requests, invitations, bidding, booking and manual payment tracking, cookie-based JWT authentication, role authorization, PostgreSQL connectivity through Prisma, Scalar API documentation, and a database-backed health endpoint. Real payment processing and notifications are intentionally excluded.
 
 ## Prerequisites
 
@@ -180,6 +180,58 @@ Example invitation batch:
 ```json
 {
   "vendorIds": ["11111111-1111-4111-8111-111111111111"]
+}
+```
+
+## Bidding, bookings, and payment tracking
+
+Vendor bidding endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/vendor/requests/:id/bid` | Submit one final NPR bid for an invited OPEN request |
+| GET | `/api/vendor/bids` | List only the authenticated vendor's bids |
+
+ADMIN selection and comparison endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/work-requests/:id/bids` | Compare bids by amount with count and lowest bid |
+| POST | `/api/bids/:id/accept` | Accept one bid, reject competitors, book the request |
+
+Booking and payment endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/bookings` | List ADMIN booking summaries with payment balances |
+| GET | `/api/bookings/:id` | Get the winning bid, vendor, event, and payment history |
+| POST | `/api/bookings/:id/payments` | Record an externally completed payment |
+| GET | `/api/vendor/bookings` | List only bookings awarded to the authenticated vendor |
+
+Money is accepted as a decimal string, stored as PostgreSQL `DECIMAL(12,2)`, calculated with Prisma Decimal, and returned consistently with two decimal places. A bid amount must be positive and no greater than `9999999999.99` NPR. Vendors receive one immutable bid per invitation; the unique invitation constraint protects concurrent submissions.
+
+Bid acceptance is manual—there is no automatic cheapest-bid selection. A serializable transaction conditionally changes the selected bid to ACCEPTED, other submitted bids to REJECTED, the request to BOOKED, and creates its unique Booking. Unique work-request and bid constraints prevent multiple bookings.
+
+Payments are manual records of funds completed outside this application; no gateway transaction is initiated. Payment totals and `UNPAID`, `PARTIALLY_PAID`, or `PAID` status are derived rather than stored. Serializable transactions prevent concurrent records from exceeding the unchanged booking amount.
+
+Example bid:
+
+```json
+{
+  "amount": "75000.00",
+  "notes": "Includes stage decoration, flowers, lighting and installation."
+}
+```
+
+Example payment record:
+
+```json
+{
+  "amount": "20000.00",
+  "method": "BANK_TRANSFER",
+  "reference": "BANK-TXN-12345",
+  "notes": "Advance payment to vendor",
+  "paidAt": "2026-11-04T10:00:00.000Z"
 }
 ```
 

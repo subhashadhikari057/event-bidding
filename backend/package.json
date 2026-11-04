@@ -20,7 +20,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "db:seed": "prisma db seed",
-    "test": "node --import tsx --test src/auth/*.spec.ts src/auth/guards/*.spec.ts src/work-requests/*.spec.ts src/invitations/*.spec.ts"
+    "test": "node --import tsx --test src/auth/*.spec.ts src/auth/guards/*.spec.ts src/work-requests/*.spec.ts src/invitations/*.spec.ts src/bids/*.spec.ts src/bookings/*.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "12.3.2",
