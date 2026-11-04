@@ -1,5 +1,21 @@
 import { plainToInstance } from 'class-transformer';
-import { IsInt, IsUrl, Max, Min, validateSync } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsString,
+  IsUrl,
+  Matches,
+  Max,
+  Min,
+  MinLength,
+  validateSync,
+} from 'class-validator';
+
+enum NodeEnvironment {
+  Development = 'development',
+  Test = 'test',
+  Production = 'production',
+}
 
 class Environment {
   @IsInt()
@@ -12,6 +28,17 @@ class Environment {
 
   @IsUrl({ protocols: ['postgresql', 'postgres'], require_protocol: true, require_tld: false })
   DATABASE_URL!: string;
+
+  @IsEnum(NodeEnvironment)
+  NODE_ENV = NodeEnvironment.Development;
+
+  @IsString()
+  @MinLength(32)
+  JWT_SECRET!: string;
+
+  @IsString()
+  @Matches(/^\d+[smhd]$/)
+  JWT_EXPIRES_IN = '24h';
 }
 
 export function validateEnvironment(config: Record<string, unknown>): Environment {
