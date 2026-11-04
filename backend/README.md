@@ -1,6 +1,6 @@
 # Mero Event backend
 
-NestJS backend for the Mero Event Vendor Bidding and Booking System assessment. It includes admin and vendor users, vendor companies, cookie-based JWT authentication, role authorization, PostgreSQL connectivity through Prisma, Scalar API documentation, and a database-backed health endpoint. Vendor management and other business APIs are intentionally deferred.
+NestJS backend for the Mero Event Vendor Bidding and Booking System assessment. It includes admin and vendor users, ADMIN-only vendor management, cookie-based JWT authentication, role authorization, PostgreSQL connectivity through Prisma, Scalar API documentation, and a database-backed health endpoint. Bidding, booking, payment, and other business APIs are intentionally deferred.
 
 ## Prerequisites
 
@@ -117,6 +117,22 @@ Module 2 point 11 was explicitly excluded, so the Prisma schema was not changed 
 - reset vendors can use the temporary password, but forced first-login password replacement is unavailable.
 
 Logout clears the current browser cookie but cannot revoke a copied JWT. Add persistent `tokenVersion` and `mustChangePassword` fields before relying on global token revocation or forced password changes.
+
+## Vendor management
+
+All vendor management endpoints require a valid ADMIN cookie:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/vendors` | Create a Vendor and linked VENDOR User atomically |
+| GET | `/api/vendors` | List vendors with optional `search` and `isActive` filters |
+| GET | `/api/vendors/:id` | Get one vendor and safe linked account fields |
+| PATCH | `/api/vendors/:id` | Update vendor details and linked login email/name |
+| PATCH | `/api/vendors/:id/status` | Activate or deactivate both vendor and login account |
+
+Creation accepts an initial password of 6–72 UTF-8 bytes, stores only a bcrypt hash with cost 12, and never returns the password or hash. Emails are trimmed, lowercased, and checked case-insensitively across both User and Vendor records. Vendor creation, linked identity updates, and status synchronization use database transactions. Deactivation immediately prevents login and invalidates protected requests because authentication checks current database state on every request.
+
+`GET /api/vendors?search=photo&isActive=true` performs a case-insensitive company-name or email search and returns newest vendors first. `isActive` accepts only `true` or `false`.
 
 ## Run the API
 

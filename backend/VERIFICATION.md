@@ -50,3 +50,12 @@ Installed the official `@scalar/nestjs-api-reference` middleware at `/api/refere
 - Disposable vendor verification records were removed after the smoke test.
 - Scalar embeds all five authentication operations, request/response schemas, cookie authentication, status codes, and the one-time credential warning.
 - Confirmed limitation: a copied pre-reset JWT remains valid because `tokenVersion` was intentionally not added. Forced password-change state is likewise unavailable without `mustChangePassword`.
+
+## Module 3 vendor management verification
+
+- Added five ADMIN-only vendor endpoints for create, list/search/filter, details, updates, and status changes.
+- Prisma schema and migrations remain unchanged; the existing User/Vendor relation supports the module.
+- `npm run lint`, `npm run build`, and the existing 26 authentication/authorization tests passed.
+- A real PostgreSQL and HTTP smoke test passed for ADMIN creation, unauthenticated 401, VENDOR 403, duplicate email 409, atomic linked records, bcrypt password hashing, listing, details, linked email/name updates, deactivate/login rejection, reactivate/login success, and safe responses without `passwordHash`.
+- Scalar returned HTTP 200 and contained the documented `/api/vendors` operations and request schemas.
+- Disposable ADMIN, User, and Vendor smoke-test records were removed after verification.
