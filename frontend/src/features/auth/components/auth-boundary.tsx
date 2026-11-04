@@ -2,9 +2,11 @@
 
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/shared/brand-mark";
+import { AUTH_UNAUTHORIZED_EVENT } from "@/lib/api-client";
 import type { UserRole } from "../auth.types";
 import { useAuth } from "../use-auth";
 
@@ -12,6 +14,16 @@ export function AuthBoundary({ children, role }: { children: ReactNode; role: Us
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      queryClient.clear();
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    };
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+  }, [pathname, queryClient, router]);
 
   useEffect(() => {
     if (auth.unauthenticated) {

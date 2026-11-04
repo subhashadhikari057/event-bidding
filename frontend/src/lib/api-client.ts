@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
+export const AUTH_UNAUTHORIZED_EVENT = "mero-event:unauthorized";
 
 interface BackendErrorBody {
   message?: string | string[];
@@ -70,7 +71,12 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
   }
 
   const body = await parseBody(response);
-  if (!response.ok) throw errorFromResponse(response.status, body);
+  if (!response.ok) {
+    if (response.status === 401 && path !== "/auth/login" && typeof window !== "undefined") {
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
+    }
+    throw errorFromResponse(response.status, body);
+  }
   return body as T;
 }
 

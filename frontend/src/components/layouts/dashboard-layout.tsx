@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -43,23 +42,23 @@ import { cn } from "@/lib/utils";
 
 interface NavigationItem {
   label: string;
-  href?: string;
+  href: string;
   icon: LucideIcon;
 }
 
 const adminNavigation: NavigationItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Vendors", href: "/admin/vendors", icon: Store },
-  { label: "Work Requests", icon: ClipboardList },
-  { label: "Bids", icon: Gavel },
-  { label: "Bookings", icon: BriefcaseBusiness },
+  { label: "Work Requests", href: "/admin/work-requests", icon: ClipboardList },
+  { label: "Bids", href: "/admin/bids", icon: Gavel },
+  { label: "Bookings", href: "/admin/bookings", icon: BriefcaseBusiness },
 ];
 
 const vendorNavigation: NavigationItem[] = [
   { label: "Dashboard", href: "/vendor/dashboard", icon: LayoutDashboard },
-  { label: "Assigned Requests", icon: FileText },
-  { label: "My Bids", icon: Gavel },
-  { label: "My Bookings", icon: WalletCards },
+  { label: "Assigned Requests", href: "/vendor/requests", icon: FileText },
+  { label: "My Bids", href: "/vendor/bids", icon: Gavel },
+  { label: "My Bookings", href: "/vendor/bookings", icon: WalletCards },
 ];
 
 function SidebarContent({ role, onNavigate }: { role: UserRole; onNavigate?: () => void }) {
@@ -74,16 +73,7 @@ function SidebarContent({ role, onNavigate }: { role: UserRole; onNavigate?: () 
       <nav className="flex-1 space-y-1 p-3" aria-label={`${role.toLowerCase()} navigation`}>
         {navigation.map((item) => {
           const Icon = item.icon;
-          const active = item.href === pathname;
-          if (!item.href) {
-            return (
-              <div key={item.label} className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-slate-400" aria-disabled="true">
-                <Icon className="size-4.5" aria-hidden="true" />
-                <span>{item.label}</span>
-                <Badge variant="outline" className="ml-auto border-slate-200 px-1.5 py-0 text-[9px] text-slate-400">Soon</Badge>
-              </div>
-            );
-          }
+          const active = item.href === pathname || pathname.startsWith(`${item.href}/`);
           return (
             <Link key={item.label} href={item.href} onClick={onNavigate} className={cn("flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors", active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-950")}>
               <Icon className="size-4.5" aria-hidden="true" />

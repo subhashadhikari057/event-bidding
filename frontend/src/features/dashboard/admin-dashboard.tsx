@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { BookOpenCheck, BriefcaseBusiness, ClipboardList, Plus, Store, TicketCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,7 +83,7 @@ export function AdminDashboard() {
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" disabled><Plus />Add Vendor · Coming Soon</Button>
           <Button variant="outline" disabled><ClipboardList />Create Work Request · Coming Soon</Button>
-          <Button variant="outline" disabled><BookOpenCheck />View Bookings · Coming Soon</Button>
+          <Button variant="outline" asChild><Link href="/admin/bookings"><BookOpenCheck />View Bookings</Link></Button>
         </div>
       </section>
     </div>
