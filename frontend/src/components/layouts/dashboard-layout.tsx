@@ -49,7 +49,7 @@ interface NavigationItem {
 
 const adminNavigation: NavigationItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Vendors", icon: Store },
+  { label: "Vendors", href: "/admin/vendors", icon: Store },
   { label: "Work Requests", icon: ClipboardList },
   { label: "Bids", icon: Gavel },
   { label: "Bookings", icon: BriefcaseBusiness },
