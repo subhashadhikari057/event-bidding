@@ -39,6 +39,13 @@ class Environment {
   @IsString()
   @Matches(/^\d+[smhd]$/)
   JWT_EXPIRES_IN = '24h';
+
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true, require_tld: false })
+  PUBLIC_BACKEND_URL = 'http://localhost:4000';
+
+  @IsString()
+  @MinLength(1)
+  UPLOAD_DIR = './uploads';
 }
 
 export function validateEnvironment(config: Record<string, unknown>): Environment {

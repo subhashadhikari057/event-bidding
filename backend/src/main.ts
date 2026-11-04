@@ -5,6 +5,9 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import cookieParser from 'cookie-parser';
+import express from 'express';
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { AppModule } from './app.module';
 import { AUTH_COOKIE_NAME, COOKIE_AUTH_SCHEME } from './auth/auth.constants';
 
@@ -16,6 +19,13 @@ async function bootstrap(): Promise<void> {
   app.use(cookieParser());
   app.enableCors({ origin: frontendUrl, credentials: true });
   app.enableCsrfProtection({ trustedOrigins: [frontendUrl] });
+  const uploadDirectory = resolve(config.getOrThrow<string>('UPLOAD_DIR'), 'work-requests');
+  await mkdir(uploadDirectory, { recursive: true });
+  app.use('/uploads/work-requests', express.static(uploadDirectory, {
+    dotfiles: 'deny',
+    index: false,
+    fallthrough: false,
+  }));
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,

@@ -26,6 +26,8 @@ Keep all subsequent commands in `backend`. `.env` is ignored by Git and excluded
 
 `JWT_SECRET` must contain at least 32 characters. Generate a deployment secret with `openssl rand -base64 48` and keep it outside version control. `JWT_EXPIRES_IN` accepts values such as `24h`, and `NODE_ENV=production` enables the cookie's `Secure` attribute.
 
+`PUBLIC_BACKEND_URL` is the externally usable API origin used in uploaded photo URLs. `UPLOAD_DIR` is the local assessment/demo storage root; it defaults to the ignored `./uploads` directory. Use an absolute writable path in deployment. Local disk storage is intentionally simple for this assessment and should be replaced with durable object storage in production.
+
 If port 5432 is already in use, set `POSTGRES_PORT=5433` and change the port in `DATABASE_URL` to `5433` in `.env` before starting Compose. On the setup machine, `.env` uses this alternative because another local PostgreSQL service owns port 5432; `.env.example` retains the standard defaults.
 
 Changing initialization credentials does not modify an existing database volume. Change database roles explicitly if you already have persisted data.
@@ -133,6 +135,53 @@ All vendor management endpoints require a valid ADMIN cookie:
 Creation accepts an initial password of 6–72 UTF-8 bytes, stores only a bcrypt hash with cost 12, and never returns the password or hash. Emails are trimmed, lowercased, and checked case-insensitively across both User and Vendor records. Vendor creation, linked identity updates, and status synchronization use database transactions. Deactivation immediately prevents login and invalidates protected requests because authentication checks current database state on every request.
 
 `GET /api/vendors?search=photo&isActive=true` performs a case-insensitive company-name or email search and returns newest vendors first. `isActive` accepts only `true` or `false`.
+
+## Work requests and invitations
+
+ADMIN work-request endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/work-requests` | Create a DRAFT request and nested items atomically |
+| GET | `/api/work-requests` | List requests with optional `status` and `search` filters |
+| GET | `/api/work-requests/:id` | Get details, items, photos, and safe creator information |
+| PATCH | `/api/work-requests/:id` | Update a DRAFT request and optionally replace its items |
+| POST | `/api/work-requests/:id/photos` | Upload reference photos to a DRAFT request |
+| POST | `/api/work-requests/:id/invitations` | Invite active vendors and change DRAFT to OPEN |
+| GET | `/api/work-requests/:id/invitations` | List invited vendors |
+
+Vendor-facing endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/vendor/requests` | List only the authenticated vendor's assignments |
+| GET | `/api/vendor/requests/:id` | Get an assigned request, items, photos, and own invitation status |
+
+Request creation requires at least one item with a positive integer quantity. `eventDate` accepts an ISO 8601 date-time with an explicit timezone and PostgreSQL stores the resulting absolute instant. Only DRAFT requests can be edited or receive photos; sending the first invitation changes DRAFT to OPEN in the same transaction. OPEN, BOOKED, and CANCELLED requests reject edits with HTTP 409.
+
+Photo upload uses multipart field `photos`, accepts JPEG, PNG, and WebP signatures, limits each file to 5 MB, and allows at most five stored photos per request. Filenames are generated UUIDs, not client filenames. Files are served from `/uploads/work-requests/...`; only their URLs are stored in PostgreSQL. Failed database persistence removes newly written files.
+
+Invitation batches validate every vendor before writing. Missing, inactive, previously invited, or duplicated vendors cause the whole operation to fail. The composite database constraint on `(workRequestId, vendorId)` also protects concurrent requests. Vendor request APIs derive `vendorId` from the authenticated database identity and return 404 for unassigned details.
+
+Example request creation:
+
+```json
+{
+  "title": "Wedding Stage Decoration",
+  "description": "Stage decoration and lighting for a wedding reception.",
+  "eventDate": "2026-12-15T10:00:00.000Z",
+  "eventLocation": "Kathmandu",
+  "items": [{ "name": "Stage Decoration", "quantity": 1, "unit": "set" }]
+}
+```
+
+Example invitation batch:
+
+```json
+{
+  "vendorIds": ["11111111-1111-4111-8111-111111111111"]
+}
+```
 
 ## Run the API
 

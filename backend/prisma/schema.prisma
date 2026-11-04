@@ -13,6 +13,18 @@ enum UserRole {
   VENDOR
 }
 
+enum WorkRequestStatus {
+  DRAFT
+  OPEN
+  BOOKED
+  CANCELLED
+}
+
+enum InvitationStatus {
+  PENDING
+  RESPONDED
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
@@ -22,6 +34,7 @@ model User {
   vendorId     String?  @unique @db.Uuid
   isActive     Boolean  @default(true)
   vendor       Vendor?  @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  workRequests WorkRequest[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -36,6 +49,63 @@ model Vendor {
   category      String?
   isActive      Boolean  @default(true)
   user          User?
+  invitations   Invitation[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model WorkRequest {
+  id            String            @id @default(uuid()) @db.Uuid
+  title         String
+  description   String
+  eventDate     DateTime
+  eventLocation String
+  status        WorkRequestStatus @default(DRAFT)
+  createdById   String            @db.Uuid
+  createdBy     User              @relation(fields: [createdById], references: [id])
+  items         RequestItem[]
+  photos        RequestPhoto[]
+  invitations   Invitation[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([createdById])
+  @@index([status])
+}
+
+model RequestItem {
+  id            String      @id @default(uuid()) @db.Uuid
+  workRequestId String      @db.Uuid
+  workRequest   WorkRequest @relation(fields: [workRequestId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  quantity      Int
+  unit          String?
+  createdAt     DateTime    @default(now())
+
+  @@index([workRequestId])
+}
+
+model RequestPhoto {
+  id            String      @id @default(uuid()) @db.Uuid
+  workRequestId String      @db.Uuid
+  workRequest   WorkRequest @relation(fields: [workRequestId], references: [id], onDelete: Cascade)
+  imageUrl      String
+  createdAt     DateTime    @default(now())
+
+  @@index([workRequestId])
+}
+
+model Invitation {
+  id            String           @id @default(uuid()) @db.Uuid
+  workRequestId String           @db.Uuid
+  vendorId      String           @db.Uuid
+  status        InvitationStatus @default(PENDING)
+  workRequest   WorkRequest      @relation(fields: [workRequestId], references: [id], onDelete: Cascade)
+  vendor        Vendor           @relation(fields: [vendorId], references: [id])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@unique([workRequestId, vendorId])
+  @@index([vendorId])
 }

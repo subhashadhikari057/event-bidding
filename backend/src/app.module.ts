@@ -3,7 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment';
 import { HealthModule } from './health/health.module';
+import { InvitationsModule } from './invitations/invitations.module';
 import { VendorsModule } from './vendors/vendors.module';
+import { WorkRequestsModule } from './work-requests/work-requests.module';
 
 @Module({
   imports: [
@@ -11,6 +13,8 @@ import { VendorsModule } from './vendors/vendors.module';
     AuthModule,
     HealthModule,
     VendorsModule,
+    WorkRequestsModule,
+    InvitationsModule,
   ],
 })
 export class AppModule {}

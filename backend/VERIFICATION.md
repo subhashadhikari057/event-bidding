@@ -48,6 +48,7 @@ Installed the official `@scalar/nestjs-api-reference` middleware at `/api/refere
 - `npm test`: 24 tests passed across service, JWT guard, roles guard, controller, cookie clearing, and non-cacheable reset responses.
 - Real HTTP smoke tests passed for login, unknown/wrong credentials, current user, logout, password change, ADMIN reset, VENDOR 403, temporary-password login, health, Scalar, cookie flags, and cross-origin HTTP 403.
 - Disposable vendor verification records were removed after the smoke test.
+
 - Scalar embeds all five authentication operations, request/response schemas, cookie authentication, status codes, and the one-time credential warning.
 - Confirmed limitation: a copied pre-reset JWT remains valid because `tokenVersion` was intentionally not added. Forced password-change state is likewise unavailable without `mustChangePassword`.
 
@@ -59,3 +60,18 @@ Installed the official `@scalar/nestjs-api-reference` middleware at `/api/refere
 - A real PostgreSQL and HTTP smoke test passed for ADMIN creation, unauthenticated 401, VENDOR 403, duplicate email 409, atomic linked records, bcrypt password hashing, listing, details, linked email/name updates, deactivate/login rejection, reactivate/login success, and safe responses without `passwordHash`.
 - Scalar returned HTTP 200 and contained the documented `/api/vendors` operations and request schemas.
 - Disposable ADMIN, User, and Vendor smoke-test records were removed after verification.
+
+## Modules 4 and 5 verification
+
+- Added `WorkRequestStatus`, `InvitationStatus`, WorkRequest, RequestItem, RequestPhoto, and Invitation with inverse User/Vendor relations, cascade child cleanup, query indexes, and a unique work-request/vendor invitation constraint.
+- Created and applied migration `20261104090927_add_work_requests_and_invitations`; existing User and Vendor data was preserved.
+- Implemented nine documented APIs across Work Requests, Invitations, and Vendor Requests Scalar tags.
+- Nested request-item validation requires at least one item and quantity greater than zero. ISO 8601 event date-times are stored as absolute instants.
+- Reference uploads enforce 5 MB per file, five photos per request, DRAFT state, and JPEG/PNG/WebP signatures. A real PNG-signature upload and controlled static URL were verified; invalid content returned 400 and an oversized file returned 413.
+- Invitation verification covered multi-vendor atomic failure, inactive vendor rejection, duplicate rejection, DRAFT-to-OPEN transition, and no partial writes.
+- Vendor isolation verification confirmed assigned list/detail access and HTTP 404 for an unassigned request. ADMIN-only endpoints returned 403 to VENDOR and 401 without authentication.
+- Real HTTP tests also covered DRAFT replacement updates, OPEN modification conflicts, listing/search/filtering, safe response redaction, health, existing vendor creation, and authentication.
+- `npm test`: 35 tests passed across authentication, guards, work requests, nested DTO validation, image signatures, invitations, atomic failure paths, and vendor assignment isolation.
+- `npm run lint`, `npm run build`, Prisma validation/generation, migration deployment, PostgreSQL health, and Scalar route discovery passed.
+- Multer was updated to 2.5.0 after the production audit identified high-severity advisories in 2.0.2. `npm audit --omit=dev` subsequently reported zero production vulnerabilities.
+- All disposable users, vendors, requests, invitations, items, photos, and uploaded smoke-test files were removed.
