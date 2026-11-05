@@ -2,6 +2,29 @@
 
 NestJS backend for the Mero Event Vendor Bidding and Booking System assessment. It includes admin and vendor users, vendor management, work requests, invitations, bidding, booking and manual payment tracking, cookie-based JWT authentication, role authorization, PostgreSQL connectivity through Prisma, Scalar API documentation, and a database-backed health endpoint. Real payment processing and notifications are intentionally excluded.
 
+## Backend quick start
+
+Run these commands from `backend/` for a new local database:
+
+```sh
+cp .env.example .env
+# Review .env, especially JWT_SECRET, database ports and ADMIN_* values.
+
+npm ci
+docker compose up -d --wait
+
+npm run prisma:validate
+npm run prisma:generate
+npm run prisma:deploy
+npm run db:seed
+
+npm run start:dev
+```
+
+The API starts at `http://localhost:4000/api` and Scalar documentation is available at `http://localhost:4000/api/reference`. The frontend is expected at `http://localhost:3000`.
+
+After both applications have been installed and the database prepared, you can instead start the backend and frontend together from the repository root with `npm run dev`. See the root `README.md` for the complete first-run workflow.
+
 ## Prerequisites
 
 - Node.js 24 LTS and npm
@@ -197,6 +220,7 @@ ADMIN selection and comparison endpoints:
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
 | GET | `/api/work-requests/:id/bids` | Compare bids by amount with count and lowest bid |
+| GET | `/api/bids/summary` | Return real bid totals grouped by status for the ADMIN dashboard |
 | POST | `/api/bids/:id/accept` | Accept one bid, reject competitors, book the request |
 
 Booking and payment endpoints:

@@ -23,6 +23,13 @@ export interface WorkRequestSummary {
   _count: { items: number; invitations: number };
 }
 
+export interface AdminBidSummary {
+  totalBids: number;
+  submitted: number;
+  accepted: number;
+  rejected: number;
+}
+
 export interface PaymentSummary {
   bookingAmount: string;
   totalPaid: string;

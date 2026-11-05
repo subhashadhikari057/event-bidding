@@ -33,6 +33,7 @@ export function useAcceptBid() {
     mutationFn: ({ bidId }: { bidId: string; workRequestId: string }) => bidsApi.accept(bidId),
     onSuccess: (_data, variables) => Promise.all([
       client.invalidateQueries({ queryKey: bidKeys.comparison(variables.workRequestId) }),
+      client.invalidateQueries({ queryKey: ["admin", "bids", "summary"] }),
       client.invalidateQueries({ queryKey: workRequestKeys.admin }),
       client.invalidateQueries({ queryKey: ["admin", "bookings"] }),
       client.invalidateQueries({ queryKey: ["vendor"] }),

@@ -15,6 +15,23 @@ const MAX_MONEY = new Prisma.Decimal('9999999999.99');
 export class BidsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async summary() {
+    const counts = await this.prisma.bid.groupBy({
+      by: ['status'],
+      _count: { _all: true },
+    });
+    const byStatus = new Map(counts.map((entry) => [entry.status, entry._count._all]));
+    const submitted = byStatus.get(BidStatus.SUBMITTED) ?? 0;
+    const accepted = byStatus.get(BidStatus.ACCEPTED) ?? 0;
+    const rejected = byStatus.get(BidStatus.REJECTED) ?? 0;
+    return {
+      totalBids: submitted + accepted + rejected,
+      submitted,
+      accepted,
+      rejected,
+    };
+  }
+
   async submit(workRequestId: string, vendorId: string | null, dto: CreateBidDto) {
     if (!vendorId) throw new NotFoundException('Assigned work request not found');
     const amount = this.parseAmount(dto.amount);

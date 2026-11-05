@@ -1,6 +1,7 @@
 import { api } from "@/lib/api-client";
 import type {
   AdminBooking,
+  AdminBidSummary,
   AssignedRequest,
   VendorBid,
   VendorBooking,
@@ -12,6 +13,7 @@ export const dashboardApi = {
   admin: {
     vendors: (signal?: AbortSignal) => api.get<VendorSummary[]>("/vendors", signal),
     workRequests: (signal?: AbortSignal) => api.get<WorkRequestSummary[]>("/work-requests", signal),
+    bidSummary: (signal?: AbortSignal) => api.get<AdminBidSummary>("/bids/summary", signal),
     bookings: (signal?: AbortSignal) => api.get<AdminBooking[]>("/bookings", signal),
   },
   vendor: {

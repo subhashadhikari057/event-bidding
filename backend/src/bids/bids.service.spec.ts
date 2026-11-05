@@ -11,6 +11,20 @@ const vendorId = '22222222-2222-4222-8222-222222222222';
 const bidId = '33333333-3333-4333-8333-333333333333';
 
 describe('BidsService', () => {
+  it('returns real bid totals grouped by status', async () => {
+    const prisma = {
+      bid: {
+        groupBy: async () => [
+          { status: BidStatus.SUBMITTED, _count: { _all: 4 } },
+          { status: BidStatus.ACCEPTED, _count: { _all: 2 } },
+          { status: BidStatus.REJECTED, _count: { _all: 3 } },
+        ],
+      },
+    } as unknown as PrismaService;
+    const result = await new BidsService(prisma).summary();
+    assert.deepEqual(result, { totalBids: 9, submitted: 4, accepted: 2, rejected: 3 });
+  });
+
   it('creates a bid and marks its invitation RESPONDED atomically', async () => {
     let invitationUpdated = false;
     const transaction = {

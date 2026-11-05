@@ -19,16 +19,17 @@ export function AdminDashboard() {
   const auth = useAuth();
   const vendors = useQuery({ queryKey: ["admin", "vendors"], queryFn: ({ signal }) => dashboardApi.admin.vendors(signal) });
   const requests = useQuery({ queryKey: ["admin", "work-requests"], queryFn: ({ signal }) => dashboardApi.admin.workRequests(signal) });
+  const bidSummary = useQuery({ queryKey: ["admin", "bids", "summary"], queryFn: ({ signal }) => dashboardApi.admin.bidSummary(signal) });
   const bookings = useQuery({ queryKey: ["admin", "bookings"], queryFn: ({ signal }) => dashboardApi.admin.bookings(signal) });
-  const loading = vendors.isPending || requests.isPending || bookings.isPending;
-  const error = vendors.error ?? requests.error ?? bookings.error;
+  const loading = vendors.isPending || requests.isPending || bidSummary.isPending || bookings.isPending;
+  const error = vendors.error ?? requests.error ?? bidSummary.error ?? bookings.error;
 
   if (loading) return <DashboardLoadingState />;
   if (error) {
     return (
       <Card className="border-red-200 bg-red-50 shadow-none">
         <CardHeader><CardTitle className="text-base text-red-800">Dashboard data is unavailable</CardTitle><CardDescription className="text-red-700">{getErrorMessage(error)}</CardDescription></CardHeader>
-        <CardContent><Button variant="outline" onClick={() => void Promise.all([vendors.refetch(), requests.refetch(), bookings.refetch()])}>Try again</Button></CardContent>
+        <CardContent><Button variant="outline" onClick={() => void Promise.all([vendors.refetch(), requests.refetch(), bidSummary.refetch(), bookings.refetch()])}>Try again</Button></CardContent>
       </Card>
     );
   }
@@ -50,7 +51,7 @@ export function AdminDashboard() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard statistics">
         <StatCard title="Total Vendors" value={vendorData.length} helper={`${vendorData.filter((vendor) => vendor.isActive).length} active accounts`} icon={Store} />
         <StatCard title="Open Work Requests" value={requestData.filter((request) => request.status === "OPEN").length} helper="Currently accepting quotations" icon={ClipboardList} />
-        <StatCard title="Bids Received" value="—" helper="Available within request details" icon={TicketCheck} />
+        <StatCard title="Bids Received" value={bidSummary.data?.totalBids ?? 0} helper={`${bidSummary.data?.submitted ?? 0} awaiting admin review`} icon={TicketCheck} />
         <StatCard title="Confirmed Bookings" value={bookingData.filter((booking) => booking.status === "CONFIRMED").length} helper="Active confirmed events" icon={BriefcaseBusiness} />
       </section>
 

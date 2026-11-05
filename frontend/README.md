@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mero Event frontend
 
-## Getting Started
+Next.js frontend for the Mero Event Vendor Bidding and Booking System. It provides separate ADMIN and VENDOR portals connected to the NestJS API through authenticated HTTP-only cookies.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Admin portal
+
+- Dashboard summaries and quick links
+- Vendor creation, editing, activation and password reset
+- Work-request creation and draft editing
+- Multiple reference-photo uploads
+- Invitations to one or multiple vendors
+- Bid comparison and final vendor selection
+- Booking details, payment history and manual payment recording
+- Account password changes
+
+### Vendor portal
+
+- Assigned work requests with items and reference photos
+- Final quotation submission and bid-status tracking
+- Vendor-owned booking and payment details
+- Account password changes
+
+The frontend never sends a vendor ID to authorize vendor data. The backend derives vendor ownership from the authenticated account.
+
+## Prerequisites
+
+- Node.js 24 LTS and npm
+- The Mero Event backend running at `http://localhost:4000`
+- PostgreSQL prepared with the backend Prisma migrations and seed
+
+Complete the backend setup first by following [`backend/README.md`](../backend/README.md), or use the full repository instructions in the root [`README.md`](../README.md).
+
+## Install and configure
+
+From the repository root:
+
+```sh
+cd frontend
+cp .env.example .env.local
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The default frontend environment is:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000/api
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`NEXT_PUBLIC_API_URL` must point to the NestJS API prefix. Authentication uses `credentials: "include"`; JWTs are never stored in browser local storage.
 
-## Learn More
+## Run the frontend
 
-To learn more about Next.js, take a look at the following resources:
+```sh
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open `http://localhost:3000`. The login credentials are the `ADMIN_EMAIL` and `ADMIN_PASSWORD` values configured in `backend/.env` before running the seed. Vendor credentials are created from the Admin Vendor Management page.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+After both projects have been installed, you can start the backend and frontend together from the repository root:
 
-## Deploy on Vercel
+```sh
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Main routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Portal | Route | Purpose |
+| --- | --- | --- |
+| Public | `/login` | Admin and vendor sign-in |
+| Admin | `/admin/dashboard` | Management overview |
+| Admin | `/admin/vendors` | Vendor management |
+| Admin | `/admin/work-requests` | Work requests and invitations |
+| Admin | `/admin/bids` | Bid tracking and comparison |
+| Admin | `/admin/bookings` | Bookings and payment tracking |
+| Vendor | `/vendor/dashboard` | Vendor overview |
+| Vendor | `/vendor/requests` | Assigned work requests |
+| Vendor | `/vendor/bids` | Submitted quotations |
+| Vendor | `/vendor/bookings` | Awarded bookings and payments |
+
+## Business workflow
+
+1. An admin creates a vendor account.
+2. The admin creates a draft work request with required items and optional photos.
+3. The admin invites one or multiple active vendors, opening the request.
+4. Invited vendors review the request and submit one final quotation.
+5. The admin compares submitted bids and manually selects the winning vendor.
+6. The API creates a confirmed booking and rejects competing bids atomically.
+7. The admin records externally completed payments.
+8. The winning vendor can view the booking, payment history, paid total and remaining balance.
+
+## Scripts
+
+```sh
+npm run dev       # Start Next.js development mode
+npm run lint      # Run ESLint
+npx tsc --noEmit  # Run a standalone TypeScript check
+npm run build     # Create a production build
+npm run start     # Serve the production build
+```
+
+## Production notes
+
+- Set `NEXT_PUBLIC_API_URL` to the deployed API origin before building.
+- Configure the backend `FRONTEND_URL` to the deployed frontend origin.
+- The backend authentication cookie uses `Secure` when `NODE_ENV=production`.
+- Reference photos currently use backend local storage for this assessment; production should use durable object storage.

@@ -29,6 +29,25 @@ import { BidsService } from './bids.service';
 export class BidsController {
   constructor(private readonly bids: BidsService) {}
 
+  @Get('bids/summary')
+  @ApiOperation({ summary: 'Get real-time ADMIN bid counts for dashboard statistics' })
+  @ApiOkResponse({
+    description: 'Total bids and counts grouped by status',
+    schema: {
+      type: 'object',
+      required: ['totalBids', 'submitted', 'accepted', 'rejected'],
+      properties: {
+        totalBids: { type: 'integer', example: 12 },
+        submitted: { type: 'integer', example: 5 },
+        accepted: { type: 'integer', example: 3 },
+        rejected: { type: 'integer', example: 4 },
+      },
+    },
+  })
+  summary() {
+    return this.bids.summary();
+  }
+
   @Get('work-requests/:id/bids')
   @ApiOperation({ summary: 'Compare all submitted bids for a work request without automatic selection' })
   @ApiParam({ name: 'id', format: 'uuid' })
