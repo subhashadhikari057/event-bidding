@@ -7,11 +7,12 @@ export const COOKIE_AUTH_SCHEME = 'cookieAuth';
 
 export function authCookieOptions(config: ConfigService): CookieOptions {
   const expiresIn = parseDurationSeconds(config.getOrThrow<string>('JWT_EXPIRES_IN'));
+  const isProduction = config.getOrThrow<string>('NODE_ENV') === 'production';
 
   return {
     httpOnly: true,
-    secure: config.getOrThrow<string>('NODE_ENV') === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
     maxAge: expiresIn * 1000,
   };
