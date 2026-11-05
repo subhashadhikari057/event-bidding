@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,10 +9,20 @@ const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxBytes = 5 * 1024 * 1024;
 
 function PhotoPreview({ file }: { file: File }) {
-  const [url] = useState(() => URL.createObjectURL(file));
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  const previewUrl = useRef<string | null>(null);
+  const attachPreview = useCallback((image: HTMLImageElement | null) => {
+    if (previewUrl.current) {
+      URL.revokeObjectURL(previewUrl.current);
+      previewUrl.current = null;
+    }
+    if (image) {
+      previewUrl.current = URL.createObjectURL(file);
+      image.src = previewUrl.current;
+    }
+  }, [file]);
+
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={`Preview of ${file.name}`} className="aspect-square w-full object-cover" />;
+  return <img ref={attachPreview} alt={`Preview of ${file.name}`} className="aspect-square w-full object-cover" />;
 }
 
 export function RequestPhotoUpload({ files, onChange, existingCount = 0, disabled = false }: { files: File[]; onChange: (files: File[]) => void; existingCount?: number; disabled?: boolean }) {
