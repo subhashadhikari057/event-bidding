@@ -57,6 +57,41 @@ describe('WorkRequestsService', () => {
     await assert.rejects(service.update(requestId, { title: 'Changed' }), ConflictException);
   });
 
+  it('deletes a DRAFT request and relies on cascading relations', async () => {
+    let deletedWhere: unknown;
+    const transaction = {
+      workRequest: {
+        findUnique: async () => ({ status: WorkRequestStatus.DRAFT, photos: [] }),
+        deleteMany: async (args: { where: unknown }) => {
+          deletedWhere = args.where;
+          return { count: 1 };
+        },
+      },
+    };
+    const prisma = {
+      $transaction: async (callback: (tx: typeof transaction) => unknown) => callback(transaction),
+    } as unknown as PrismaService;
+    const service = new WorkRequestsService(prisma, config());
+
+    await service.remove(requestId);
+
+    assert.deepEqual(deletedWhere, { id: requestId, status: WorkRequestStatus.DRAFT });
+  });
+
+  it('rejects deleting a request that is no longer DRAFT', async () => {
+    const transaction = {
+      workRequest: {
+        findUnique: async () => ({ status: WorkRequestStatus.OPEN, photos: [] }),
+      },
+    };
+    const prisma = {
+      $transaction: async (callback: (tx: typeof transaction) => unknown) => callback(transaction),
+    } as unknown as PrismaService;
+    const service = new WorkRequestsService(prisma, config());
+
+    await assert.rejects(service.remove(requestId), ConflictException);
+  });
+
   it('rejects invalid nested item quantities through DTO validation', async () => {
     const dto = plainToInstance(CreateWorkRequestDto, {
       title: 'Wedding',

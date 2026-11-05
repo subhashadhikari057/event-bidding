@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -21,6 +24,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -108,6 +112,18 @@ export class WorkRequestsController {
     @Body() dto: UpdateWorkRequestDto,
   ) {
     return this.workRequests.update(id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Permanently delete a DRAFT work request' })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Draft work request deleted' })
+  @ApiBadRequestResponse({ description: 'Work request ID is not a UUID' })
+  @ApiNotFoundResponse({ description: 'Work request does not exist' })
+  @ApiConflictResponse({ description: 'Only DRAFT work requests can be deleted' })
+  async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<void> {
+    await this.workRequests.remove(id);
   }
 
   @Post(':id/photos')

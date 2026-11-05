@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '../generated/prisma/client';
 import { WorkRequestStatus } from '../generated/prisma/enums';
@@ -125,6 +125,32 @@ export class WorkRequestsService {
 
       return transaction.workRequest.findUniqueOrThrow({ where: { id }, select: detailSelection });
     });
+  }
+
+  async remove(id: string): Promise<void> {
+    const photos = await this.prisma.$transaction(async (transaction) => {
+      const request = await transaction.workRequest.findUnique({
+        where: { id },
+        select: { status: true, photos: { select: { imageUrl: true } } },
+      });
+      if (!request) throw new NotFoundException('Work request not found');
+      if (request.status !== WorkRequestStatus.DRAFT) {
+        throw new ConflictException('Only DRAFT work requests can be deleted');
+      }
+
+      const deleted = await transaction.workRequest.deleteMany({
+        where: { id, status: WorkRequestStatus.DRAFT },
+      });
+      if (deleted.count === 0) {
+        throw new ConflictException('Only DRAFT work requests can be deleted');
+      }
+      return request.photos;
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+
+    await Promise.all(photos.map(({ imageUrl }) => {
+      if (!imageUrl.startsWith('/uploads/work-requests/')) return Promise.resolve();
+      return unlink(resolve(this.uploadDirectory, basename(imageUrl))).catch(() => undefined);
+    }));
   }
 
   async addPhotos(id: string, files: Express.Multer.File[]) {

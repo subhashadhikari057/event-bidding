@@ -33,6 +33,17 @@ export function useUpdateWorkRequest() {
   return useMutation({ mutationFn: ({ id, input }: { id: string; input: WorkRequestInput }) => workRequestsApi.update(id, input), onSuccess: invalidate });
 }
 
+export function useDeleteWorkRequest() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => workRequestsApi.remove(id),
+    onSuccess: (_data, id) => Promise.all([
+      client.invalidateQueries({ queryKey: workRequestKeys.admin }),
+      client.removeQueries({ queryKey: workRequestKeys.detail(id) }),
+    ]),
+  });
+}
+
 export function useUploadRequestPhotos() {
   const invalidate = useInvalidateRequests();
   return useMutation({ mutationFn: ({ id, files }: { id: string; files: File[] }) => workRequestsApi.uploadPhotos(id, files), onSuccess: invalidate });

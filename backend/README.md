@@ -169,6 +169,7 @@ ADMIN work-request endpoints:
 | GET | `/api/work-requests` | List requests with optional `status` and `search` filters |
 | GET | `/api/work-requests/:id` | Get details, items, photos, and safe creator information |
 | PATCH | `/api/work-requests/:id` | Update a DRAFT request and optionally replace its items |
+| DELETE | `/api/work-requests/:id` | Permanently delete a DRAFT request and its local reference photos |
 | POST | `/api/work-requests/:id/photos` | Upload reference photos to a DRAFT request |
 | POST | `/api/work-requests/:id/invitations` | Invite active vendors and change DRAFT to OPEN |
 | GET | `/api/work-requests/:id/invitations` | List invited vendors |
@@ -182,7 +183,7 @@ Vendor-facing endpoints:
 
 Request creation requires at least one item with a positive integer quantity. `eventDate` accepts an ISO 8601 date-time with an explicit timezone and PostgreSQL stores the resulting absolute instant. Only DRAFT requests can be edited or receive photos; sending the first invitation changes DRAFT to OPEN in the same transaction. OPEN, BOOKED, and CANCELLED requests reject edits with HTTP 409.
 
-Photo upload uses multipart field `photos`, accepts JPEG, PNG, and WebP signatures, limits each file to 5 MB, and allows at most five stored photos per request. Filenames are generated UUIDs, not client filenames. Files are served from `/uploads/work-requests/...`; only their URLs are stored in PostgreSQL. Failed database persistence removes newly written files.
+Photo upload uses multipart field `photos`, accepts JPEG, PNG, and WebP signatures, limits each file to 5 MB, and allows at most five stored photos per request. Filenames are generated UUIDs, not client filenames. Files are served from `/uploads/work-requests/...`; only their relative paths are stored in PostgreSQL. Failed database persistence removes newly written files, and deleting a draft cleans up its stored files.
 
 Invitation batches validate every vendor before writing. Missing, inactive, previously invited, or duplicated vendors cause the whole operation to fail. The composite database constraint on `(workRequestId, vendorId)` also protects concurrent requests. Vendor request APIs derive `vendorId` from the authenticated database identity and return 404 for unassigned details.
 

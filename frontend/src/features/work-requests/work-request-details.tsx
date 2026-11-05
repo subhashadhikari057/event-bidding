@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BriefcaseBusiness, CalendarDays, ImagePlus, LoaderCircle, MapPin, Pencil, Send } from "lucide-react";
+import { ArrowLeft, BriefcaseBusiness, CalendarDays, ImagePlus, LoaderCircle, MapPin, Pencil, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ApiError, getErrorMessage } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
+import { DeleteWorkRequestDialog } from "./components/delete-work-request-dialog";
 import { InviteVendorsDialog } from "./components/invite-vendors-dialog";
 import { InvitedVendorsTable } from "./components/invited-vendors-table";
 import { RequestPhotoGallery } from "./components/request-photo-gallery";
@@ -22,6 +23,7 @@ export function WorkRequestDetails({ id }: { id: string }) {
   const detail = useWorkRequest(id);
   const upload = useUploadRequestPhotos();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
   if (detail.isPending) return <div className="space-y-5"><div className="h-28 animate-pulse rounded-xl bg-slate-200" /><div className="h-64 animate-pulse rounded-xl bg-slate-200" /></div>;
@@ -41,7 +43,7 @@ export function WorkRequestDetails({ id }: { id: string }) {
 
   return <div className="space-y-6">
     <Button variant="ghost" size="sm" asChild><Link href="/admin/work-requests"><ArrowLeft />Back to Work Requests</Link></Button>
-    <section className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h1 className="text-3xl font-semibold tracking-tight text-slate-950">{request.title}</h1><StatusBadge status={request.status} /></div><div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-500"><span className="flex items-center gap-1.5"><CalendarDays className="size-4" />{formatDate(request.eventDate)}</span><span className="flex items-center gap-1.5"><MapPin className="size-4" />{request.eventLocation}</span><span>Created {formatDate(request.createdAt)}</span></div></div><div className="flex flex-wrap gap-2">{canEdit ? <Button variant="outline" asChild><Link href={`/admin/work-requests/${id}/edit`}><Pencil />Edit Request</Link></Button> : null}{canInvite ? <Button onClick={() => setInviteOpen(true)}><Send />Invite Vendors</Button> : null}</div></section>
+    <section className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h1 className="text-3xl font-semibold tracking-tight text-slate-950">{request.title}</h1><StatusBadge status={request.status} /></div><div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-500"><span className="flex items-center gap-1.5"><CalendarDays className="size-4" />{formatDate(request.eventDate)}</span><span className="flex items-center gap-1.5"><MapPin className="size-4" />{request.eventLocation}</span><span>Created {formatDate(request.createdAt)}</span></div></div><div className="flex flex-wrap gap-2">{canEdit ? <Button variant="destructive" onClick={() => setDeleteOpen(true)}><Trash2 />Delete Request</Button> : null}{canEdit ? <Button variant="outline" asChild><Link href={`/admin/work-requests/${id}/edit`}><Pencil />Edit Request</Link></Button> : null}{canInvite ? <Button onClick={() => setInviteOpen(true)}><Send />Invite Vendors</Button> : null}</div></section>
 
     {request.status === "BOOKED" ? <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800"><BriefcaseBusiness className="mt-0.5 size-5" /><div><p className="font-semibold">This request has been booked</p><p className="mt-1 text-sm">The accepted vendor and payment details will be available in the Bookings module.</p></div></div> : null}
 
@@ -57,5 +59,6 @@ export function WorkRequestDetails({ id }: { id: string }) {
       </div>
     </div>
     {canInvite ? <InviteVendorsDialog requestId={id} requestTitle={request.title} open={inviteOpen} onOpenChange={setInviteOpen} /> : null}
+    <DeleteWorkRequestDialog request={{ id, title: request.title }} open={deleteOpen} onOpenChange={setDeleteOpen} onDeleted={() => router.replace("/admin/work-requests")} />
   </div>;
 }

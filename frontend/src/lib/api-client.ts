@@ -86,6 +86,7 @@ export const api = {
   get: <T>(path: string, signal?: AbortSignal) => apiRequest<T>(path, { method: "GET", signal }),
   post: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: "POST", body }),
   patch: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: "PATCH", body }),
+  delete: (path: string) => apiRequest<void>(path, { method: "DELETE" }),
 };
 
 export function getErrorMessage(error: unknown): string {

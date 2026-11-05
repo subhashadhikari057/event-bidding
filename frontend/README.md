@@ -8,7 +8,7 @@ Next.js frontend for the Mero Event Vendor Bidding and Booking System. It provid
 
 - Dashboard summaries and quick links
 - Vendor creation, editing, activation and password reset
-- Work-request creation and draft editing
+- Work-request creation, draft editing and confirmed draft deletion
 - Multiple reference-photo uploads
 - Invitations to one or multiple vendors
 - Bid comparison and final vendor selection

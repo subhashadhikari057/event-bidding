@@ -14,6 +14,7 @@ export const workRequestsApi = {
   detail: (id: string, signal?: AbortSignal) => api.get<WorkRequest>(`/work-requests/${id}`, signal),
   create: (input: WorkRequestInput) => api.post<WorkRequest>("/work-requests", input),
   update: (id: string, input: WorkRequestInput) => api.patch<WorkRequest>(`/work-requests/${id}`, input),
+  remove: (id: string) => api.delete(`/work-requests/${id}`),
   uploadPhotos: (id: string, files: File[]) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("photos", file));
