@@ -12,6 +12,7 @@ import {
   ClipboardList,
   FileText,
   Gavel,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -34,6 +35,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { BrandMark } from "@/components/shared/brand-mark";
 import { authApi } from "@/features/auth/auth.api";
+import { ChangePasswordDialog } from "@/features/auth/components/change-password-dialog";
 import type { UserRole } from "@/features/auth/auth.types";
 import { useAuth } from "@/features/auth/use-auth";
 import { getErrorMessage } from "@/lib/api-client";
@@ -99,6 +101,7 @@ function SidebarContent({ role, onNavigate }: { role: UserRole; onNavigate?: () 
 
 export function DashboardLayout({ children, role }: { children: ReactNode; role: UserRole }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const auth = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -146,6 +149,8 @@ export function DashboardLayout({ children, role }: { children: ReactNode; role:
                 <DropdownMenuSeparator />
                 <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-slate-500"><BadgeCheck className="size-4 text-indigo-500" />{auth.user.role} account</div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setPasswordOpen(true)} className="px-2 py-2"><KeyRound />Change Password</DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" disabled={logout.isPending} onSelect={() => logout.mutate()} className="px-2 py-2"><LogOut />{logout.isPending ? "Signing out…" : "Sign out"}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -153,6 +158,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode; role:
         </header>
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+      <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </div>
   );
 }

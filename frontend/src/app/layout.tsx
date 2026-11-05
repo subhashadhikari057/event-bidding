@@ -7,6 +7,7 @@ import { QueryProvider } from "@/providers/query-provider";
 export const metadata: Metadata = {
   title: "Mero Event",
   description: "Vendor bidding and booking management",
+  icons: { icon: "/logo.svg" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

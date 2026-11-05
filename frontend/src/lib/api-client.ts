@@ -20,6 +20,7 @@ export class ApiError extends Error {
 
 type ApiOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
+  suppressUnauthorizedEvent?: boolean;
 };
 
 async function parseBody(response: Response): Promise<unknown> {
@@ -49,19 +50,20 @@ function errorFromResponse(status: number, body: unknown): ApiError {
 }
 
 export async function apiRequest<T>(path: string, options: ApiOptions = {}): Promise<T> {
-  const isFormData = options.body instanceof FormData;
-  const headers = new Headers(options.headers);
-  if (options.body !== undefined && !isFormData) headers.set("Content-Type", "application/json");
-  const requestBody: BodyInit | undefined = options.body === undefined
+  const { suppressUnauthorizedEvent = false, ...requestOptions } = options;
+  const isFormData = requestOptions.body instanceof FormData;
+  const headers = new Headers(requestOptions.headers);
+  if (requestOptions.body !== undefined && !isFormData) headers.set("Content-Type", "application/json");
+  const requestBody: BodyInit | undefined = requestOptions.body === undefined
     ? undefined
     : isFormData
-      ? options.body as FormData
-      : JSON.stringify(options.body);
+      ? requestOptions.body as FormData
+      : JSON.stringify(requestOptions.body);
 
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, {
-      ...options,
+      ...requestOptions,
       headers,
       credentials: "include",
       body: requestBody,
@@ -72,7 +74,7 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
 
   const body = await parseBody(response);
   if (!response.ok) {
-    if (response.status === 401 && path !== "/auth/login" && typeof window !== "undefined") {
+    if (response.status === 401 && path !== "/auth/login" && !suppressUnauthorizedEvent && typeof window !== "undefined") {
       window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
     }
     throw errorFromResponse(response.status, body);
