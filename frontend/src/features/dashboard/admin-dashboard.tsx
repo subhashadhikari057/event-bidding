@@ -79,10 +79,10 @@ export function AdminDashboard() {
       </section>
 
       <section>
-        <div className="mb-4"><h2 className="text-lg font-semibold text-slate-950">Quick Actions</h2><p className="mt-1 text-sm text-slate-500">Management pages arrive in the next frontend phase.</p></div>
+        <div className="mb-4"><h2 className="text-lg font-semibold text-slate-950">Quick Actions</h2><p className="mt-1 text-sm text-slate-500">Jump directly to common management tasks.</p></div>
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" disabled><Plus />Add Vendor · Coming Soon</Button>
-          <Button variant="outline" disabled><ClipboardList />Create Work Request · Coming Soon</Button>
+          <Button variant="outline" asChild><Link href="/admin/vendors"><Plus />Add Vendor</Link></Button>
+          <Button variant="outline" asChild><Link href="/admin/work-requests/new"><ClipboardList />Create Work Request</Link></Button>
           <Button variant="outline" asChild><Link href="/admin/bookings"><BookOpenCheck />View Bookings</Link></Button>
         </div>
       </section>
