@@ -133,7 +133,15 @@ export class WorkRequestsController {
   })
   @ApiCreatedResponse({
     description: 'Stored photo records',
-    schema: { type: 'array', items: { type: 'object', properties: { imageUrl: { type: 'string', format: 'uri' } } } },
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          imageUrl: { type: 'string', example: '/uploads/work-requests/photo-id.jpg' },
+        },
+      },
+    },
   })
   @ApiBadRequestResponse({ description: 'Missing, invalid, or too many photos' })
   @ApiPayloadTooLargeResponse({ description: 'A photo exceeds 5 MB' })

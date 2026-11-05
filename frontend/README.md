@@ -46,9 +46,10 @@ The default frontend environment is:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
+NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
 ```
 
-`NEXT_PUBLIC_API_URL` must point to the NestJS API prefix. Authentication uses `credentials: "include"`; JWTs are never stored in browser local storage.
+`NEXT_PUBLIC_API_URL` must point to the NestJS API prefix. `NEXT_PUBLIC_BACKEND_URL` is the backend origin without `/api`; the frontend uses it to turn relative uploaded-photo paths into complete browser URLs. Authentication uses `credentials: "include"`; JWTs are never stored in browser local storage.
 
 ## Run the frontend
 
@@ -102,7 +103,7 @@ npm run start     # Serve the production build
 
 ## Production notes
 
-- Set `NEXT_PUBLIC_API_URL` to the deployed API origin before building.
+- Set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_BACKEND_URL` to the deployed API URL and backend origin before building.
 - Configure the backend `FRONTEND_URL` to the deployed frontend origin.
 - The backend authentication cookie uses `Secure` when `NODE_ENV=production`.
 - Reference photos currently use backend local storage for this assessment; production should use durable object storage.

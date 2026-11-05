@@ -67,7 +67,7 @@ npm ci
 cd ..
 ```
 
-The default `NEXT_PUBLIC_API_URL=http://localhost:4000/api` is correct for local development. See [`frontend/README.md`](frontend/README.md) for routes, workflow and production configuration.
+The default API and backend-origin values are correct for local development. `NEXT_PUBLIC_API_URL` targets `/api`, while `NEXT_PUBLIC_BACKEND_URL` is the origin used to resolve relative uploaded-photo paths. See [`frontend/README.md`](frontend/README.md) for routes, workflow and production configuration.
 
 ### 3. Start both applications from the root
 

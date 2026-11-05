@@ -16,7 +16,6 @@ function config(): ConfigService {
   return {
     getOrThrow: (key: string) => ({
       UPLOAD_DIR: './uploads-test',
-      PUBLIC_BACKEND_URL: 'http://localhost:4000',
     })[key],
   } as unknown as ConfigService;
 }

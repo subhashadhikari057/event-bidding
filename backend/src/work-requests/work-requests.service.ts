@@ -35,14 +35,12 @@ const detailSelection = {
 @Injectable()
 export class WorkRequestsService {
   private readonly uploadDirectory: string;
-  private readonly publicBackendUrl: string;
 
   constructor(
     private readonly prisma: PrismaService,
     config: ConfigService,
   ) {
     this.uploadDirectory = resolve(config.getOrThrow<string>('UPLOAD_DIR'), 'work-requests');
-    this.publicBackendUrl = config.getOrThrow<string>('PUBLIC_BACKEND_URL').replace(/\/$/, '');
   }
 
   async create(dto: CreateWorkRequestDto, createdById: string) {
@@ -156,7 +154,7 @@ export class WorkRequestsService {
       const filename = `${randomUUID()}.${extensions[index]}`;
       return {
         path: resolve(this.uploadDirectory, filename),
-        imageUrl: `${this.publicBackendUrl}/uploads/work-requests/${filename}`,
+        imageUrl: `/uploads/work-requests/${filename}`,
         buffer: file.buffer,
       };
     });

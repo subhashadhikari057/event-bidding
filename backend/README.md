@@ -49,7 +49,7 @@ Keep all subsequent commands in `backend`. `.env` is ignored by Git and excluded
 
 `JWT_SECRET` must contain at least 32 characters. Generate a deployment secret with `openssl rand -base64 48` and keep it outside version control. `JWT_EXPIRES_IN` accepts values such as `24h`, and `NODE_ENV=production` enables the cookie's `Secure` attribute.
 
-`PUBLIC_BACKEND_URL` is the externally usable API origin used in uploaded photo URLs. `UPLOAD_DIR` is the local assessment/demo storage root; it defaults to the ignored `./uploads` directory. Use an absolute writable path in deployment. Local disk storage is intentionally simple for this assessment and should be replaced with durable object storage in production.
+`UPLOAD_DIR` is the local assessment/demo storage root; it defaults to the ignored `./uploads` directory. Use an absolute writable path in deployment. PostgreSQL stores relative photo paths such as `/uploads/work-requests/photo.jpg`; the frontend combines them with its configured backend origin. Local disk storage is intentionally simple for this assessment and should be replaced with durable object storage in production.
 
 If port 5432 is already in use, set `POSTGRES_PORT=5433` and change the port in `DATABASE_URL` to `5433` in `.env` before starting Compose. On the setup machine, `.env` uses this alternative because another local PostgreSQL service owns port 5432; `.env.example` retains the standard defaults.
 
