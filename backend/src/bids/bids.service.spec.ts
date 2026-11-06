@@ -97,7 +97,7 @@ describe('BidsService', () => {
         create: async () => {
           bookingCreated = true;
           return {
-            id: 'booking', workRequestId: requestId, bidId,
+            id: 'booking', reference: 'ME-BKG-000001', workRequestId: requestId, bidId,
             amount: new Prisma.Decimal('75000.00'), status: 'CONFIRMED', createdAt: new Date(),
           };
         },
@@ -107,6 +107,7 @@ describe('BidsService', () => {
       $transaction: async (callback: (tx: typeof transaction) => unknown) => callback(transaction),
     } as unknown as PrismaService;
     const result = await new BidsService(prisma).accept(bidId);
+    assert.equal(result.reference, 'ME-BKG-000001');
     assert.equal(result.amount, '75000.00');
     assert.equal(competitorsRejected, true);
     assert.equal(bookingCreated, true);

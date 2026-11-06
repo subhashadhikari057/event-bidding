@@ -213,6 +213,7 @@ export class BidsService {
           },
           select: {
             id: true,
+            reference: true,
             workRequestId: true,
             bidId: true,
             amount: true,

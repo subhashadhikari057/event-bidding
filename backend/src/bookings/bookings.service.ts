@@ -25,6 +25,7 @@ export function paymentSummary(bookingAmount: Prisma.Decimal, payments: PaymentA
 
 const bookingSelection = {
   id: true,
+  reference: true,
   amount: true,
   status: true,
   createdAt: true,
@@ -96,6 +97,7 @@ export class BookingsService {
       const mapped = this.mapBooking(booking);
       return {
         id: mapped.id,
+        reference: mapped.reference,
         status: mapped.status,
         createdAt: mapped.createdAt,
         workRequest: mapped.workRequest,
@@ -109,6 +111,7 @@ export class BookingsService {
   private mapBooking(booking: Prisma.BookingGetPayload<{ select: typeof bookingSelection }>) {
     return {
       id: booking.id,
+      reference: booking.reference,
       status: booking.status,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,

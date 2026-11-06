@@ -31,6 +31,7 @@ export interface BookingWorkRequest {
 
 export interface AdminBooking {
   id: string;
+  reference: string;
   amount: string;
   status: BookingStatus;
   createdAt: string;
@@ -56,6 +57,7 @@ export interface AdminBooking {
 
 export interface VendorBooking {
   id: string;
+  reference: string;
   status: BookingStatus;
   createdAt: string;
   workRequest: BookingWorkRequest;

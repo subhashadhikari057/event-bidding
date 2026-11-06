@@ -146,6 +146,7 @@ model Bid {
 
 model Booking {
   id            String        @id @default(uuid()) @db.Uuid
+  reference     String        @unique @default(dbgenerated("('ME-BKG-'::text || lpad((nextval('booking_reference_seq'::regclass))::text, 6, '0'::text))"))
   workRequestId String        @unique @db.Uuid
   bidId         String        @unique @db.Uuid
   workRequest   WorkRequest   @relation(fields: [workRequestId], references: [id])
